@@ -102,6 +102,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
           'placement="'+startSym+'tt_placement'+endSym+'" '+
           'animation="tt_animation" '+
           'is-open="tt_isOpen"'+
+          'compile-scope="$parent"'+
           '>'+
         '</div>';
 
@@ -223,7 +224,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
           }
           
           // Hide the tooltip popup element.
-          function hide() {
+          function hide( destroy ) {
             // First things first: we don't show it anymore.
             scope.tt_isOpen = false;
 
@@ -235,10 +236,19 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             // FIXME: this is a placeholder for a port of the transitions library.
             if ( scope.tt_animation ) {
               transitionTimeout = $timeout(function () {
-                tooltip.remove();
+                remove( destroy );
               }, 500);
             } else {
+              remove( destroy );
+            }
+          }
+
+          function remove( destroy ) {
+            if ( destroy ) {
               tooltip.remove();
+            } else {
+              // corresponds to jQuery's "detach" (should be included in jqLite?)
+              angular.forEach( tooltip, function( e ) { e.parentNode.removeChild( e ); } );
             }
           }
 
@@ -312,7 +322,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             $timeout.cancel( transitionTimeout );
             $timeout.cancel( popupTimeout );
             unregisterTriggers();
-            tooltip.remove();
+            remove( true );
             tooltip.unbind();
             tooltip = null;
           });

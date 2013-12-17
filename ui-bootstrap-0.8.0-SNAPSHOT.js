@@ -2021,6 +2021,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
           var transitionTimeout;
           var popupTimeout;
           var appendToBody = angular.isDefined( options.appendToBody ) ? options.appendToBody : false;
+          var resizeOnShow = angular.isDefined( options.resizeOnShow ) ? options.resizeOnShow : false;
           var triggers = getTriggers( undefined );
           var hasRegisteredTriggers = false;
           var hasEnableExp = angular.isDefined(attrs[prefix+'Enable']);
@@ -2090,7 +2091,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             // Get the height and width of the tooltip so we can center it.
             ttWidth = tooltip.prop( 'offsetWidth' );
             ttHeight = tooltip.prop( 'offsetHeight' );
-            
+
             // Calculate the tooltip's top and left coordinates to center it with
             // this directive.
             switch ( scope.tt_placement ) {
@@ -2104,6 +2105,18 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
                 ttPosition = {
                   top: position.top + position.height,
                   left: position.left + position.width / 2 - ttWidth / 2
+                };
+                break;
+              case 'bottom-left':
+                ttPosition = {
+                  top: position.top + position.height,
+                  left: position.left + position.width - ttWidth - 10
+                };
+                break;
+              case 'bottom-right':
+                ttPosition = {
+                  top: position.top + position.height,
+                  left: position.left + position.width - 40
                 };
                 break;
               case 'left':
@@ -2125,9 +2138,14 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
 
             // Now set the calculated positioning.
             tooltip.css( ttPosition );
-              
+
+            if ( resizeOnShow ) {
+              $window.dispatchEvent(new Event('resize'));
+            }
             // And show the tooltip.
             scope.tt_isOpen = true;
+
+
           }
           
           // Hide the tooltip popup element.
@@ -2211,6 +2229,10 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
 
           attrs.$observe( prefix+'AppendToBody', function ( val ) {
             appendToBody = angular.isDefined( val ) ? $parse( val )( scope ) : appendToBody;
+          });
+
+          attrs.$observe( prefix+'ResizeOnShow', function ( val ) {
+            resizeOnShow = angular.isDefined( val ) ? $parse( val )( scope ) : resizeOnShow;
           });
 
           // if a tooltip is attached to <body> we need to remove it on
